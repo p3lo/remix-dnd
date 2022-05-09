@@ -76,8 +76,8 @@ export default function Index() {
       })
     );
   }, []);
-  const moveAccordionItem = useCallback((dragIndex: number, hoverIndex: number, index: number) => {
-    console.log(dragIndex, hoverIndex, index);
+  const moveAccordionItem = useCallback((dragIndex: number, hoverIndex: number, indexA: number, indexQ: number) => {
+    console.log(dragIndex, hoverIndex, indexA, indexQ);
     // setItems((prev: any) =>
     //   update(prev, {
     //     prev: {
@@ -103,7 +103,8 @@ export default function Index() {
             <AccordionDND key={item.position} index={indexQ} moveAccordion={moveAccordion} label={item.label}>
               {item.superpowers.map((superpower: any, indexA: number) => (
                 <AccordionItemDND
-                  index={indexQ}
+                  indexA={indexA}
+                  indexQ={indexQ}
                   key={indexA}
                   label={superpower.label}
                   moveAccordionItem={moveAccordionItem}

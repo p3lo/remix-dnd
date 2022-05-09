@@ -9,18 +9,18 @@ export const ItemTypes = {
   AIDNDI: 'aidndi',
 };
 
-export interface AccordionProps {
-  index: number;
-
+export interface AccordionItem {
+  indexA: number;
+  indexQ: number;
   label: string;
-  moveAccordionItem: (dragIndex: number, hoverIndex: number, index: number) => void;
+  moveAccordionItem: (dragIndex: number, hoverIndex: number, indexA: number, indexQ: number) => void;
 }
 
 interface DragItem {
   index: number;
 }
 
-export const AccordionItemDND: FC<AccordionProps> = ({ moveAccordionItem, index, label }) => {
+export const AccordionItemDND: FC<AccordionItem> = ({ moveAccordionItem, indexA, indexQ, label }) => {
   const ref = useRef<HTMLDivElement>(null);
 
   const [{ handlerId }, drop] = useDrop<DragItem, void, { handlerId: Identifier | null }>({
@@ -35,7 +35,7 @@ export const AccordionItemDND: FC<AccordionProps> = ({ moveAccordionItem, index,
         return;
       }
       const dragIndex = item.index;
-      const hoverIndex = index;
+      const hoverIndex = indexA;
 
       // Don't replace items with themselves
       if (dragIndex === hoverIndex) {
@@ -69,7 +69,7 @@ export const AccordionItemDND: FC<AccordionProps> = ({ moveAccordionItem, index,
       }
 
       // Time to actually perform the action
-      moveAccordionItem(dragIndex, hoverIndex, index);
+      moveAccordionItem(dragIndex, hoverIndex, indexA, indexQ);
 
       // Note: we're mutating the monitor item here!
       // Generally it's better to avoid mutations,
@@ -82,7 +82,7 @@ export const AccordionItemDND: FC<AccordionProps> = ({ moveAccordionItem, index,
   const [{ isDragging }, drag] = useDrag({
     type: ItemTypes.AIDNDI,
     item: () => {
-      return { index };
+      return { indexA, indexQ };
     },
     collect: (monitor: any) => ({
       isDragging: monitor.isDragging(),
