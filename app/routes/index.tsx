@@ -6,6 +6,7 @@ import { HTML5Backend } from 'react-dnd-html5-backend';
 import { AccordionDND } from '~/component/AccordionDND';
 import update from 'immutability-helper';
 import { AccordionItemDND } from '~/component/AccordionItemDND';
+import { Text } from '@mantine/core';
 
 let charactersList = [
   {
@@ -65,6 +66,7 @@ export const action: ActionFunction = async ({ request }) => {
 export default function Index() {
   const loadData = useLoaderData();
   const [items, setItems] = useState(loadData);
+  console.log(items);
   const moveAccordion = useCallback((dragIndex: number, hoverIndex: number) => {
     console.log(dragIndex, hoverIndex);
     setItems((prev: any) =>
@@ -76,26 +78,26 @@ export default function Index() {
       })
     );
   }, []);
-  const moveAccordionItem = useCallback((dragIndex: number, hoverIndex: number, indexA: number, indexQ: number) => {
-    console.log(dragIndex, hoverIndex, indexA, indexQ);
-    // setItems((prev: any) =>
-    //   update(prev, {
-    //     prev: {
-    //       [index]: {
-    //         superpowers: {
-    //           $splice: [
-    //             [dragIndex, 1],
-    //             [hoverIndex, 0, prev[dragIndex]],
-    //           ],
-    //         },
-    //       },
-    //     },
-    //   })
-    // );
+  const moveAccordionItem = useCallback((dragIndex: number, hoverIndex: number, indexQ: number, index: number) => {
+    console.log(dragIndex, hoverIndex, index, indexQ);
+    console.log(items[indexQ].superpowers[dragIndex], items[indexQ].superpowers[hoverIndex]);
+    const superpowers = items[indexQ].superpowers;
+    setItems((prev: any) =>
+      update(prev, {
+        [indexQ]: {
+          superpowers: {
+            $splice: [
+              [dragIndex, 1],
+              [hoverIndex, 0, superpowers[dragIndex]],
+            ],
+          },
+        },
+      })
+    );
   }, []);
 
   return (
-    <div className="w-3/4 mx-auto flex flex-col space-y-5">
+    <div className="flex flex-col w-3/4 mx-auto space-y-5">
       <h1 className="mx-auto">Hello, world!</h1>
       <DndProvider backend={HTML5Backend}>
         <div className="flex flex-col">
@@ -103,12 +105,16 @@ export default function Index() {
             <AccordionDND key={item.position} index={indexQ} moveAccordion={moveAccordion} label={item.label}>
               {item.superpowers.map((superpower: any, indexA: number) => (
                 <AccordionItemDND
-                  indexA={indexA}
+                  index={indexA}
                   indexQ={indexQ}
                   key={indexA}
                   label={superpower.label}
                   moveAccordionItem={moveAccordionItem}
-                />
+                >
+                  <Text>
+                    {indexA} - {superpower.label}
+                  </Text>
+                </AccordionItemDND>
               ))}
             </AccordionDND>
           ))}

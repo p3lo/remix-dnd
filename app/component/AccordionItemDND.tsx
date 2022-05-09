@@ -1,4 +1,3 @@
-import { Text } from '@mantine/core';
 import type { Identifier, XYCoord } from 'dnd-core';
 import type { FC } from 'react';
 import { useRef } from 'react';
@@ -10,17 +9,19 @@ export const ItemTypes = {
 };
 
 export interface AccordionItem {
-  indexA: number;
   indexQ: number;
+  index: number;
   label: string;
-  moveAccordionItem: (dragIndex: number, hoverIndex: number, indexA: number, indexQ: number) => void;
+  children: React.ReactNode;
+  moveAccordionItem: (dragIndex: number, hoverIndex: number, indexQ: number, index: number) => void;
 }
 
 interface DragItem {
   index: number;
+  indexQ: number;
 }
 
-export const AccordionItemDND: FC<AccordionItem> = ({ moveAccordionItem, indexA, indexQ, label }) => {
+export const AccordionItemDND: FC<AccordionItem> = ({ moveAccordionItem, index, indexQ, children }) => {
   const ref = useRef<HTMLDivElement>(null);
 
   const [{ handlerId }, drop] = useDrop<DragItem, void, { handlerId: Identifier | null }>({
@@ -35,10 +36,13 @@ export const AccordionItemDND: FC<AccordionItem> = ({ moveAccordionItem, indexA,
         return;
       }
       const dragIndex = item.index;
-      const hoverIndex = indexA;
+      const hoverIndex = index;
 
       // Don't replace items with themselves
       if (dragIndex === hoverIndex) {
+        return;
+      }
+      if (indexQ !== item.indexQ) {
         return;
       }
 
@@ -69,7 +73,7 @@ export const AccordionItemDND: FC<AccordionItem> = ({ moveAccordionItem, indexA,
       }
 
       // Time to actually perform the action
-      moveAccordionItem(dragIndex, hoverIndex, indexA, indexQ);
+      moveAccordionItem(dragIndex, hoverIndex, indexQ, index);
 
       // Note: we're mutating the monitor item here!
       // Generally it's better to avoid mutations,
@@ -82,7 +86,7 @@ export const AccordionItemDND: FC<AccordionItem> = ({ moveAccordionItem, indexA,
   const [{ isDragging }, drag] = useDrag({
     type: ItemTypes.AIDNDI,
     item: () => {
-      return { indexA, indexQ };
+      return { indexQ, index };
     },
     collect: (monitor: any) => ({
       isDragging: monitor.isDragging(),
@@ -92,11 +96,11 @@ export const AccordionItemDND: FC<AccordionItem> = ({ moveAccordionItem, indexA,
   const opacity = isDragging ? 0 : 1;
   drag(drop(ref));
   return (
-    <div className="flex items-center justify-between" ref={ref} style={{ opacity }} data-handler-id={handlerId}>
-      <Text>{label}</Text>
-      <div ref={ref}>
-        <RiDragMove2Line className="cursor-move" size={24} />
-      </div>
+    <div ref={ref} style={{ opacity }} data-handler-id={handlerId}>
+      {children}
+      {/* <div ref={ref}>
+        <RiDragMove2Line className="cursor-move" size={20} />
+      </div> */}
     </div>
   );
 };
