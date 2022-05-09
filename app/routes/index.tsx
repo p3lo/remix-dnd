@@ -78,23 +78,24 @@ export default function Index() {
       })
     );
   }, []);
-  const moveAccordionItem = useCallback((dragIndex: number, hoverIndex: number, indexQ: number, index: number) => {
-    console.log(dragIndex, hoverIndex, index, indexQ);
-    console.log(items[indexQ].superpowers[dragIndex], items[indexQ].superpowers[hoverIndex]);
-    const superpowers = items[indexQ].superpowers;
-    setItems((prev: any) =>
-      update(prev, {
-        [indexQ]: {
-          superpowers: {
-            $splice: [
-              [dragIndex, 1],
-              [hoverIndex, 0, superpowers[dragIndex]],
-            ],
+  const moveAccordionItem = useCallback(
+    (dragIndex: number, hoverIndex: number, indexQ: number) => {
+      const superpowers = items[indexQ].superpowers;
+      setItems((prev: any) =>
+        update(prev, {
+          [indexQ]: {
+            superpowers: {
+              $splice: [
+                [dragIndex, 1],
+                [hoverIndex, 0, superpowers[dragIndex]],
+              ],
+            },
           },
-        },
-      })
-    );
-  }, []);
+        })
+      );
+    },
+    [items]
+  );
 
   return (
     <div className="flex flex-col w-3/4 mx-auto space-y-5">
@@ -104,13 +105,7 @@ export default function Index() {
           {items.map((item: any, indexQ: number) => (
             <AccordionDND key={item.position} index={indexQ} moveAccordion={moveAccordion} label={item.label}>
               {item.superpowers.map((superpower: any, indexA: number) => (
-                <AccordionItemDND
-                  index={indexA}
-                  indexQ={indexQ}
-                  key={indexA}
-                  label={superpower.label}
-                  moveAccordionItem={moveAccordionItem}
-                >
+                <AccordionItemDND index={indexA} indexQ={indexQ} key={indexA} moveAccordionItem={moveAccordionItem}>
                   <Text>
                     {indexA} - {superpower.label}
                   </Text>

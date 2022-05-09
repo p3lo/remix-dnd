@@ -11,12 +11,11 @@ export const ItemTypes = {
 export interface AccordionItem {
   indexQ: number;
   index: number;
-  label: string;
   children: React.ReactNode;
   moveAccordionItem: (dragIndex: number, hoverIndex: number, indexQ: number, index: number) => void;
 }
 
-interface DragItem {
+interface DragItem2 {
   index: number;
   indexQ: number;
 }
@@ -24,14 +23,14 @@ interface DragItem {
 export const AccordionItemDND: FC<AccordionItem> = ({ moveAccordionItem, index, indexQ, children }) => {
   const ref = useRef<HTMLDivElement>(null);
 
-  const [{ handlerId }, drop] = useDrop<DragItem, void, { handlerId: Identifier | null }>({
+  const [{ handlerId }, drop] = useDrop<DragItem2, void, { handlerId: Identifier | null }>({
     accept: ItemTypes.AIDNDI,
     collect(monitor) {
       return {
         handlerId: monitor.getHandlerId(),
       };
     },
-    hover(item: DragItem, monitor) {
+    hover(item: DragItem2, monitor) {
       if (!ref.current) {
         return;
       }
