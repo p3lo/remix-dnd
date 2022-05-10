@@ -1,5 +1,5 @@
 import type { ActionFunction, LoaderFunction } from '@remix-run/node';
-import { useLoaderData } from '@remix-run/react';
+import { useActionData, useLoaderData, useSubmit } from '@remix-run/react';
 import { useCallback, useState } from 'react';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
@@ -57,18 +57,21 @@ export const loader: LoaderFunction = async () => {
 
 export const action: ActionFunction = async ({ request }) => {
   const formData = await request.formData();
-  const dI = formData.get('dI');
-  const hI = formData.get('hI');
-  console.log(dI, hI);
-  return null;
+  const items = formData.get('item')?.toString();
+  const indexQ = formData.get('indexQ')?.toString();
+  if (!items || !indexQ) {
+    return null;
+  }
+  console.log(JSON.parse(items)[+indexQ]);
+  return JSON.parse(items);
 };
 
 export default function Index() {
   const loadData = useLoaderData();
+  const actionData = useActionData();
+  const submit = useSubmit();
   const [items, setItems] = useState(loadData);
-  console.log(items);
   const moveAccordion = useCallback((dragIndex: number, hoverIndex: number) => {
-    console.log(dragIndex, hoverIndex);
     setItems((prev: any) =>
       update(prev, {
         $splice: [
@@ -80,7 +83,7 @@ export default function Index() {
   }, []);
   const moveAccordionItem = useCallback(
     (dragIndex: number, hoverIndex: number, indexQ: number) => {
-      const superpowers = items[indexQ].superpowers;
+      const superpowers = Object.assign(items[indexQ].superpowers);
       setItems((prev: any) =>
         update(prev, {
           [indexQ]: {
@@ -93,8 +96,27 @@ export default function Index() {
           },
         })
       );
+      submit(
+        {
+          item: JSON.stringify(
+            update(items, {
+              [indexQ]: {
+                superpowers: {
+                  $splice: [
+                    [dragIndex, 1],
+                    [hoverIndex, 0, superpowers[dragIndex]],
+                  ],
+                },
+              },
+            })
+          ),
+          indexQ: indexQ.toString(),
+        },
+        { method: 'post', replace: true }
+      );
     },
-    [items]
+
+    [items, submit]
   );
 
   return (
@@ -105,7 +127,12 @@ export default function Index() {
           {items.map((item: any, indexQ: number) => (
             <AccordionDND key={item.position} index={indexQ} moveAccordion={moveAccordion} label={item.label}>
               {item.superpowers.map((superpower: any, indexA: number) => (
-                <AccordionItemDND index={indexA} indexQ={indexQ} key={indexA} moveAccordionItem={moveAccordionItem}>
+                <AccordionItemDND
+                  index={indexA}
+                  indexQ={indexQ}
+                  key={superpower.id}
+                  moveAccordionItem={moveAccordionItem}
+                >
                   <Text>
                     {indexA} - {superpower.label}
                   </Text>

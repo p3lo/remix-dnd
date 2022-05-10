@@ -21,7 +21,7 @@ interface DragItem2 {
 }
 
 export const AccordionItemDND: FC<AccordionItem> = ({ moveAccordionItem, index, indexQ, children }) => {
-  const ref = useRef<HTMLDivElement>(null);
+  const refNested = useRef<HTMLDivElement>(null);
 
   const [{ handlerId }, drop] = useDrop<DragItem2, void, { handlerId: Identifier | null }>({
     accept: ItemTypes.AIDNDI,
@@ -31,7 +31,7 @@ export const AccordionItemDND: FC<AccordionItem> = ({ moveAccordionItem, index, 
       };
     },
     hover(item: DragItem2, monitor) {
-      if (!ref.current) {
+      if (!refNested.current) {
         return;
       }
       const dragIndex = item.index;
@@ -46,7 +46,7 @@ export const AccordionItemDND: FC<AccordionItem> = ({ moveAccordionItem, index, 
       }
 
       // Determine rectangle on screen
-      const hoverBoundingRect = ref.current?.getBoundingClientRect();
+      const hoverBoundingRect = refNested.current?.getBoundingClientRect();
 
       // Get vertical middle
       const hoverMiddleY = (hoverBoundingRect.bottom - hoverBoundingRect.top) / 2;
@@ -92,14 +92,14 @@ export const AccordionItemDND: FC<AccordionItem> = ({ moveAccordionItem, index, 
     }),
   });
 
-  const opacity = isDragging ? 0 : 1;
-  drag(drop(ref));
+  const opacity = isDragging ? 0.5 : 1;
+  drag(drop(refNested));
   return (
-    <div ref={ref} style={{ opacity }} data-handler-id={handlerId}>
+    <div className="flex items-center justify-between" ref={refNested} style={{ opacity }} data-handler-id={handlerId}>
       {children}
-      {/* <div ref={ref}>
+      <div ref={refNested}>
         <RiDragMove2Line className="cursor-move" size={20} />
-      </div> */}
+      </div>
     </div>
   );
 };
