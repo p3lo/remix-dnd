@@ -13,6 +13,7 @@ export interface AccordionItem {
   index: number;
   children: React.ReactNode;
   moveAccordionItem: (dragIndex: number, hoverIndex: number, indexQ: number, index: number) => void;
+  moveCompleted: (indexQ: number) => void;
 }
 
 interface DragItem2 {
@@ -20,7 +21,7 @@ interface DragItem2 {
   indexQ: number;
 }
 
-export const AccordionItemDND: FC<AccordionItem> = ({ moveAccordionItem, index, indexQ, children }) => {
+export const AccordionItemDND: FC<AccordionItem> = ({ moveAccordionItem, index, indexQ, children, moveCompleted }) => {
   const refNested = useRef<HTMLDivElement>(null);
 
   const [{ handlerId }, drop] = useDrop<DragItem2, void, { handlerId: Identifier | null }>({
@@ -28,6 +29,8 @@ export const AccordionItemDND: FC<AccordionItem> = ({ moveAccordionItem, index, 
     collect(monitor) {
       return {
         handlerId: monitor.getHandlerId(),
+        didDrop: monitor.didDrop(),
+        isOver: monitor.isOver(),
       };
     },
     hover(item: DragItem2, monitor) {
@@ -70,7 +73,6 @@ export const AccordionItemDND: FC<AccordionItem> = ({ moveAccordionItem, index, 
       if (dragIndex > hoverIndex && hoverClientY > hoverMiddleY) {
         return;
       }
-
       // Time to actually perform the action
       moveAccordionItem(dragIndex, hoverIndex, indexQ, index);
 
@@ -90,6 +92,11 @@ export const AccordionItemDND: FC<AccordionItem> = ({ moveAccordionItem, index, 
     collect: (monitor: any) => ({
       isDragging: monitor.isDragging(),
     }),
+    end: (item: DragItem2, monitor) => {
+      if (monitor.didDrop()) {
+        moveCompleted(indexQ);
+      }
+    },
   });
 
   const opacity = isDragging ? 0.5 : 1;

@@ -112,12 +112,15 @@ export default function Index() {
           ),
           indexQ: indexQ.toString(),
         },
-        { method: 'post', replace: true }
+        { method: 'post' }
       );
     },
 
     [items, submit]
   );
+  const moveCompleted = useCallback((indexQ: number) => {
+    submit({ item: JSON.stringify(items), indexQ: indexQ.toString() }, { method: 'post', replace: true });
+  }, []);
 
   return (
     <div className="flex flex-col w-3/4 mx-auto space-y-5">
@@ -132,6 +135,7 @@ export default function Index() {
                   indexQ={indexQ}
                   key={superpower.id}
                   moveAccordionItem={moveAccordionItem}
+                  moveCompleted={moveCompleted}
                 >
                   <Text>
                     {indexA} - {superpower.label}
