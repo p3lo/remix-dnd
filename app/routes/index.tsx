@@ -14,9 +14,9 @@ let charactersList = [
     position: 1,
     label: 'Bender Bending Rodríguez',
     superpowers: [
-      { id: 1, label: 'Strength' },
-      { id: 2, label: 'Power' },
-      { id: 3, label: 'Speed' },
+      { id: 1, label: 'Strength', position: 1 },
+      { id: 2, label: 'Power', position: 2 },
+      { id: 3, label: 'Speed', position: 3 },
     ],
   },
   {
@@ -24,9 +24,9 @@ let charactersList = [
     position: 2,
     label: 'Carol Miller',
     superpowers: [
-      { id: 1, label: 'Strength' },
-      { id: 2, label: 'Power' },
-      { id: 3, label: 'Speed' },
+      { id: 1, label: 'Strength', position: 1 },
+      { id: 2, label: 'Power', position: 2 },
+      { id: 3, label: 'Speed', position: 3 },
     ],
   },
   {
@@ -34,9 +34,9 @@ let charactersList = [
     position: 3,
     label: 'Homer Simpson',
     superpowers: [
-      { id: 1, label: 'Strength' },
-      { id: 2, label: 'Power' },
-      { id: 3, label: 'Speed' },
+      { id: 1, label: 'Strength', position: 1 },
+      { id: 2, label: 'Power', position: 2 },
+      { id: 3, label: 'Speed', position: 3 },
     ],
   },
   {
@@ -44,9 +44,9 @@ let charactersList = [
     position: 4,
     label: 'Spongebob Squarepants',
     superpowers: [
-      { id: 1, label: 'Strength' },
-      { id: 2, label: 'Power' },
-      { id: 3, label: 'Speed' },
+      { id: 1, label: 'Strength', position: 1 },
+      { id: 2, label: 'Power', position: 2 },
+      { id: 3, label: 'Speed', position: 3 },
     ],
   },
 ];
@@ -57,13 +57,26 @@ export const loader: LoaderFunction = async () => {
 
 export const action: ActionFunction = async ({ request }) => {
   const formData = await request.formData();
-  const items = formData.get('item')?.toString();
   const indexQ = formData.get('indexQ')?.toString();
-  if (!items || !indexQ) {
+  const index = formData.get('index')?.toString();
+  const id = formData.get('id')?.toString();
+  if (!indexQ || !index || !id) {
     return null;
   }
-  console.log(JSON.parse(items)[+indexQ]);
-  return JSON.parse(items);
+  let chars = Object.assign(charactersList);
+  const indexItem = chars[+indexQ].superpowers.findIndex((c: any) => c.id === Number(id));
+  let newChars = update(chars, {
+    [+indexQ]: {
+      superpowers: {
+        $splice: [
+          [indexItem, 1],
+          [+index, 0, chars[+indexQ].superpowers[indexItem]],
+        ],
+      },
+    },
+  });
+  console.log(indexQ, index, id, newChars[+indexQ].superpowers);
+  return null;
 };
 
 export default function Index() {
@@ -96,30 +109,15 @@ export default function Index() {
           },
         })
       );
-      submit(
-        {
-          item: JSON.stringify(
-            update(items, {
-              [indexQ]: {
-                superpowers: {
-                  $splice: [
-                    [dragIndex, 1],
-                    [hoverIndex, 0, superpowers[dragIndex]],
-                  ],
-                },
-              },
-            })
-          ),
-          indexQ: indexQ.toString(),
-        },
-        { method: 'post' }
-      );
     },
 
-    [items, submit]
+    [items]
   );
-  const moveCompleted = useCallback((indexQ: number) => {
-    submit({ item: JSON.stringify(items), indexQ: indexQ.toString() }, { method: 'post', replace: true });
+  const moveCompleted = useCallback((indexQ: number, index: number, id: number) => {
+    submit(
+      { indexQ: indexQ.toString(), index: index.toString(), id: id.toString() },
+      { method: 'post', replace: true }
+    );
   }, []);
 
   return (
@@ -133,12 +131,13 @@ export default function Index() {
                 <AccordionItemDND
                   index={indexA}
                   indexQ={indexQ}
+                  id={superpower.id}
                   key={superpower.id}
                   moveAccordionItem={moveAccordionItem}
                   moveCompleted={moveCompleted}
                 >
                   <Text>
-                    {indexA} - {superpower.label}
+                    {superpower.id} - {superpower.label}
                   </Text>
                 </AccordionItemDND>
               ))}

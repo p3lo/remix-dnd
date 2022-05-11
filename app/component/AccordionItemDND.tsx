@@ -11,17 +11,26 @@ export const ItemTypes = {
 export interface AccordionItem {
   indexQ: number;
   index: number;
+  id: number;
   children: React.ReactNode;
   moveAccordionItem: (dragIndex: number, hoverIndex: number, indexQ: number, index: number) => void;
-  moveCompleted: (indexQ: number) => void;
+  moveCompleted: (indexQ: number, index: number, id: number) => void;
 }
 
 interface DragItem2 {
   index: number;
   indexQ: number;
+  id: number;
 }
 
-export const AccordionItemDND: FC<AccordionItem> = ({ moveAccordionItem, index, indexQ, children, moveCompleted }) => {
+export const AccordionItemDND: FC<AccordionItem> = ({
+  moveAccordionItem,
+  index,
+  indexQ,
+  children,
+  moveCompleted,
+  id,
+}) => {
   const refNested = useRef<HTMLDivElement>(null);
 
   const [{ handlerId }, drop] = useDrop<DragItem2, void, { handlerId: Identifier | null }>({
@@ -87,14 +96,14 @@ export const AccordionItemDND: FC<AccordionItem> = ({ moveAccordionItem, index, 
   const [{ isDragging }, drag] = useDrag({
     type: ItemTypes.AIDNDI,
     item: () => {
-      return { indexQ, index };
+      return { indexQ, index, id };
     },
     collect: (monitor: any) => ({
       isDragging: monitor.isDragging(),
     }),
     end: (item: DragItem2, monitor) => {
       if (monitor.didDrop()) {
-        moveCompleted(indexQ);
+        moveCompleted(indexQ, index, item.id);
       }
     },
   });
